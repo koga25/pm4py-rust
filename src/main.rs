@@ -3,13 +3,12 @@ use ahash::AHashMap;
 use row::Row;
 
 struct Traces<'a> {
-    attributes: AHashMap<&'a str, &'a AnyValue<'a>>,
+    attributes: AHashMap<&'a str, AnyValue<'a>>,
     events: Vec<&'a AHashMap<&'a str, AnyValue<'a>>>
 }
 
 struct EventLog<'a> {
     traces: Vec<Traces<'a>>,
-    mapping: AHashMap<&'a AnyValue<'a>, usize>,
 }
 
 fn main() {
@@ -50,7 +49,6 @@ fn main() {
     println!("{} columns", row_len);
     println!("{} rows", df_height);
 
-
     for index in 0..df_height {
         df.get_row_amortized(index, &mut row);
         let mut trace: AHashMap<&str, AnyValue> = AHashMap::<&str, AnyValue>::new();
@@ -61,42 +59,38 @@ fn main() {
         }
         stream.push(trace);
     }
-
-
-
     
     let mut event_log: EventLog = EventLog {
         traces: Vec::<Traces>::with_capacity(unique_cases),
-        mapping: AHashMap::<& AnyValue, usize>::new()
     };
-    let case_glue:&str = "case:concept:name";
-    let case_attribute_prefix:&str = "case:";
+    let mut mapping: AHashMap<AnyValue, usize> = AHashMap::<AnyValue, usize>::new();
+    let case_glue: &str = "case:concept:name";
     let DEFAULT_TRACEID_KEY:&str = "concept:name"; 
-    let mut index = 0 as usize;
-    for dictionary in stream.iter() {
+    
+    for dictionary in stream.iter_mut() {
         let mut found: bool = false;
         //temp_dict.remove(case_glue);
-        let glue = dictionary.get(case_glue).unwrap();
-        match event_log.mapping.get(glue) {
+        let glue = dictionary.get(case_glue).unwrap().clone();
+        match mapping.get(&glue) {
             Some(v) => {
+                dictionary.remove(case_glue);
                 event_log.traces[*v].events.push(dictionary);
-                //dictionary.remove(case_glue);
             },
             None => {
                 let mut events = Vec::<&AHashMap<&str, AnyValue>>::with_capacity(1);
                 events.push(dictionary);
-                let mut attributes: AHashMap<&str, &AnyValue> = AHashMap::<&str, &AnyValue>::new();
-                attributes.insert(DEFAULT_TRACEID_KEY, glue);
+                let mut attributes: AHashMap<&str, AnyValue> = AHashMap::<&str, AnyValue>::new();
+                attributes.insert(DEFAULT_TRACEID_KEY, glue.clone());
                 let temp_event_log: Traces = Traces { 
                     attributes: attributes, 
                     events: events 
                 };
                 event_log.traces.push(temp_event_log);
-                event_log.mapping.insert(glue, event_log.traces.len() - 1);
+                mapping.insert(glue, event_log.traces.len() - 1);
             }
         }
     }
-    println!("zzzz\n");
+
     for (k, v) in event_log.traces[0].attributes.iter() {
         println!("{}, {}", k, v);
     }
