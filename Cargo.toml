@@ -1,0 +1,11 @@
+[package]
+name = "rust-pm4py"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+polars = "0.24.3"
+ahash = "0.8.0"
+connectorx = "0.2.5"
