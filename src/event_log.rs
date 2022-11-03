@@ -9,16 +9,6 @@ pub struct Traces<'a> {
     pub events: Vec<AHashMap<&'a str, AnyValue<'a>>>
 }
 
-#[derive(Eq, Hash, PartialEq, Debug, Clone, Copy, PartialOrd, Ord)]
-pub struct DfgActivities<'a> {
-    pub act1: &'a str,
-    pub act2: &'a str,
-}
-
-pub struct Dfg<'a> {
-    pub tuples: Vec<Vec<(DfgActivities<'a>, i64)>>,
-    pub ret: AHashMap<DfgActivities<'a>, Vec<i64>>
-}
 #[derive(PartialEq, Debug)]
 pub struct EventLog<'a> {
     pub traces: Vec<Traces<'a>>,
@@ -33,7 +23,7 @@ impl<'a> EventLog<'a> {
         }
     }
 
-    pub fn create_event_log(&mut self, df: &'a mut DataFrame) {
+    pub fn create_event_log(&mut self, df: &'a DataFrame) {
 
         let case_glue: &str = "case:concept:name";
         let default_traceid_key:&str = "concept:name"; 
@@ -67,7 +57,7 @@ impl<'a> EventLog<'a> {
             }
         }
 
-        let mut temp_row_indexes =  groups.unwrap_idx().all();
+        let temp_row_indexes =  groups.unwrap_idx().all();
         let mut row_indexes = temp_row_indexes.to_vec();
         row_indexes.par_sort();
         self.traces.par_iter_mut()
@@ -97,11 +87,11 @@ impl<'a> EventLog<'a> {
 
 
 
-#[cfg(test)]
-fn test_multithread_stream_creation() {
-
-    let mut stream: Vec<AHashMap<&str, AnyValue>> = Vec::<AHashMap<&str, AnyValue>>::new();
-    let mut stream2: Vec<AHashMap<&str, AnyValue>> = Vec::<AHashMap<&str, AnyValue>>::new();
+//#[cfg(test)]
+//fn test_multithread_stream_creation() {
+//
+//    let mut stream: Vec<AHashMap<&str, AnyValue>> = Vec::<AHashMap<&str, AnyValue>>::new();
+//    let mut stream2: Vec<AHashMap<&str, AnyValue>> = Vec::<AHashMap<&str, AnyValue>>::new();
     //self.stream.reserve(df.height());
     //let unique_cases = df["case:concept:name"].n_unique().unwrap();
     //self.traces.reserve(unique_cases);
@@ -145,8 +135,8 @@ fn test_multithread_stream_creation() {
     //    }
     //    stream2.push(trace);
     //}
-    assert_eq!(stream, stream2, "not equal");     
-}
+//    assert_eq!(stream, stream2, "not equal");     
+//}
 /* 
 fn test_eventlog_values() {
     self.stream.reserve(df.height());
